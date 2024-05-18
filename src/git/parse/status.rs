@@ -83,9 +83,9 @@ macro_rules! tow_chars_parser {
 tow_chars_parser!(conflic_state1, "D", "DU", Conflict);
 tow_chars_parser!(conflic_state2, "A", "AU", Conflict);
 tow_chars_parser!(conflic_state3, "U", "AUD", Conflict);
-tow_chars_parser!(local_mod_state, "MARC", "M", LocalMod);
+tow_chars_parser!(local_mod_state, "MARC ", "M", LocalMod);
 tow_chars_parser!(local_add_state, "?", "?", LocalAdd);
-tow_chars_parser!(local_del_state, "MARC", "D", LocalDel);
+tow_chars_parser!(local_del_state, "MARC ", "D", LocalDel);
 tow_chars_parser!(index_mod_state, "M", "DM ", IndexMod);
 tow_chars_parser!(index_add_state, "A", "DM ", IndexAdd);
 tow_chars_parser!(index_del_state, "D", "M ", IndexDel);

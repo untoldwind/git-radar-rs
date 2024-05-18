@@ -15,14 +15,14 @@ pub enum GitFileState {
 
 #[derive(Debug, Default)]
 pub struct GitLocalRepoChanges {
-    pub local_mod: u32,
-    pub local_add: u32,
-    pub local_del: u32,
-    pub index_mod: u32,
-    pub index_add: u32,
-    pub index_del: u32,
-    pub renamed: u32,
-    pub conflict: u32,
+    pub local_mod: usize,
+    pub local_add: usize,
+    pub local_del: usize,
+    pub index_mod: usize,
+    pub index_add: usize,
+    pub index_del: usize,
+    pub renamed: usize,
+    pub conflict: usize,
 }
 
 impl FromIterator<GitFileState> for GitLocalRepoChanges {
@@ -70,9 +70,9 @@ pub struct GitRepoState {
     pub commit_tag: String,
     pub remote: String,
     pub remote_tracking_branch: String,
-    pub stash_count: u32,
-    pub commits_to_pull: u32,
-    pub commits_to_push: u32,
-    pub merge_branch_commits_to_pull: u32,
-    pub merge_branch_commits_to_push: u32,
+    pub stash_count: usize,
+    pub commits_to_pull: usize,
+    pub commits_to_push: usize,
+    pub merge_branch_commits_to_pull: usize,
+    pub merge_branch_commits_to_push: usize,
 }
