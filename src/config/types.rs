@@ -4,13 +4,32 @@ use crate::terminal::types::{Color, ColorIntensity};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(default)]
+pub struct Parts {
+    pub show_repo_indicator: bool,
+    pub show_merge_branch_commits_diff: bool,
+    pub show_local_branch: bool,
+    pub show_commits_to_origin: bool,
+    pub show_local_changes_state: bool,
+    pub show_stashes: bool,
+}
+
+impl Default for Parts {
+    fn default() -> Self {
+        Self {
+            show_repo_indicator: true,
+            show_merge_branch_commits_diff: true,
+            show_local_branch: true,
+            show_commits_to_origin: true,
+            show_local_changes_state: true,
+            show_stashes: true,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(default)]
 pub struct Config {
-    pub show_part_repo_indicator: bool,
-    pub show_part_merge_branch_commits_diff: bool,
-    pub show_part_local_branch: bool,
-    pub show_part_commits_to_origin: bool,
-    pub show_part_local_changes_state: bool,
-    pub show_part_stashes: bool,
+    pub parts: Parts,
 
     pub repo_indicator: String,
 
@@ -78,12 +97,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            show_part_repo_indicator: true,
-            show_part_merge_branch_commits_diff: true,
-            show_part_local_branch: true,
-            show_part_commits_to_origin: true,
-            show_part_local_changes_state: true,
-            show_part_stashes: true,
+            parts: Default::default(),
 
             repo_indicator: "ᚴ".into(),
 

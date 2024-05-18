@@ -16,12 +16,22 @@ use crate::{
 
 #[derive(Parser)]
 struct Args {
+    #[arg(long)]
+    show_config: bool,
     #[arg(value_enum, default_value = "other")]
     shell: Shell,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
+
+    if args.show_config {
+        let config = get_app_config()?;
+
+        println!("{}", toml::to_string(&config)?);
+
+        return Ok(());
+    }
 
     if !check_in_git_directory()? {
         return Ok(());

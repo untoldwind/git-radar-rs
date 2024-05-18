@@ -10,7 +10,7 @@ pub fn build_prompt(shell: Shell, config: &Config, repo_state: &GitRepoState) ->
 
     result += &end_color_marker(shell);
 
-    if config.show_part_repo_indicator {
+    if config.parts.show_repo_indicator {
         result += &config.repo_indicator;
         result += " ";
     }
@@ -18,16 +18,16 @@ pub fn build_prompt(shell: Shell, config: &Config, repo_state: &GitRepoState) ->
         result += &add_no_tracked_upstream_indicator(shell, config, repo_state);
         result += &add_merge_branch_commits(shell, config, repo_state);
     }
-    if config.show_part_local_branch {
+    if config.parts.show_local_branch {
         result += &add_local_branch_name(shell, config, repo_state);
     }
-    if config.show_part_commits_to_origin {
+    if config.parts.show_commits_to_origin {
         result += &add_local_commits(shell, config, repo_state);
     }
-    if config.show_part_local_changes_state {
+    if config.parts.show_local_changes_state {
         result += &add_repo_state(shell, config, repo_state);
     }
-    if config.show_part_stashes {
+    if config.parts.show_stashes {
         result += &add_stashes(shell, config, repo_state);
     }
 
@@ -35,7 +35,7 @@ pub fn build_prompt(shell: Shell, config: &Config, repo_state: &GitRepoState) ->
 }
 
 fn show_merge_branch_indicator(config: &Config, repo_state: &GitRepoState) -> bool {
-    config.show_part_merge_branch_commits_diff
+    config.parts.show_merge_branch_commits_diff
         && !config
             .merge_branch_ignore_branches
             .contains(&repo_state.local_branch)
