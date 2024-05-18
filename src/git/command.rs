@@ -29,17 +29,24 @@ pub fn git_cmd_merge_base(local_branch_name: &str) -> Result<String, Box<dyn Err
 pub fn git_cmd_remote_name(local_branch_name: &str) -> Result<String, Box<dyn Error>> {
     Ok(str::from_utf8(&process_with_ignore_exit_code(
         "git",
-        &["config", "--get", &git_remote_tracking_config_key(local_branch_name)],
+        &[
+            "config",
+            "--get",
+            &git_remote_tracking_config_key(local_branch_name),
+        ],
     )?)?
     .trim_end()
     .into())
 }
 
-
 pub fn git_cmd_remote_branch_name(local_branch_name: &str) -> Result<String, Box<dyn Error>> {
     Ok(str::from_utf8(&process_with_ignore_exit_code(
         "git",
-        &["config", "--get", &git_remote_branch_config_key(local_branch_name)],
+        &[
+            "config",
+            "--get",
+            &git_remote_branch_config_key(local_branch_name),
+        ],
     )?)?
     .trim_end()
     .into())
@@ -49,8 +56,59 @@ pub fn git_cmd_porcelain_status() -> Result<Vec<u8>, Box<dyn Error>> {
     process_with_ignore_exit_code("git", &["status", "--porcelain"])
 }
 
+pub fn git_cmd_rev_to_push(from_commit: &str, to_commit: &str) -> Result<usize, Box<dyn Error>> {
+    Ok(str::from_utf8(&process_with_ignore_exit_code(
+        "git",
+        &[
+            "rev-list",
+            "--no-merges",
+            "--right-only",
+            "--count",
+            &merge_base_diff_from_to(from_commit, to_commit),
+        ],
+    )?)?
+    .trim_end()
+    .parse()?)
+}
+
+pub fn git_cmd_rev_to_pull(from_commit: &str, to_commit: &str) -> Result<usize, Box<dyn Error>> {
+    Ok(str::from_utf8(&process_with_ignore_exit_code(
+        "git",
+        &[
+            "rev-list",
+            "--no-merges",
+            "--left-only",
+            "--count",
+            &merge_base_diff_from_to(from_commit, to_commit),
+        ],
+    )?)?
+    .trim_end()
+    .parse()?)
+}
+
 pub fn git_cmd_stash_count() -> Result<usize, Box<dyn Error>> {
-    Ok(process_with_ignore_exit_code("git", &["stash", "list"])?.into_iter().filter(|ch| *ch == 10).count())
+    Ok(process_with_ignore_exit_code("git", &["stash", "list"])?
+        .into_iter()
+        .filter(|ch| *ch == 10)
+        .count())
+}
+
+pub fn git_cmd_commit_short_sha() -> Result<String, Box<dyn Error>> {
+    Ok(str::from_utf8(&process_with_ignore_exit_code(
+        "git",
+        &["rev-parse", "--short", "HEAD"],
+    )?)?
+    .trim_end()
+    .into())
+}
+
+pub fn git_cmd_commit_tag() -> Result<String, Box<dyn Error>> {
+    Ok(str::from_utf8(&process_with_ignore_exit_code(
+        "git",
+        &["describe", "--exact-match", "--tags"],
+    )?)?
+    .trim_end()
+    .into())
 }
 
 fn git_remote_tracking_config_key(local_branch_name: &str) -> String {
