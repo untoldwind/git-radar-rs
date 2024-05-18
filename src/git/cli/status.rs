@@ -1,5 +1,4 @@
-use std::error::Error;
-
+use anyhow::{anyhow, Result};
 use nom::{
     branch::alt,
     character::complete::{anychar, line_ending, not_line_ending, one_of},
@@ -9,22 +8,22 @@ use nom::{
 
 use crate::git::types::{GitFileState, GitLocalRepoChanges};
 
-pub fn git_parse_status(input: &[u8]) -> Result<GitLocalRepoChanges, Box<dyn Error>> {
+pub fn git_parse_status(input: &[u8]) -> Result<GitLocalRepoChanges> {
     Ok(parse_local(input)? + parse_index(input)?)
 }
 
-fn parse_local(input: &[u8]) -> Result<GitLocalRepoChanges, Box<dyn Error>> {
+fn parse_local(input: &[u8]) -> Result<GitLocalRepoChanges> {
     let mut iter = iterator(input, get_local_lines);
     let changes = iter.collect::<GitLocalRepoChanges>();
-    iter.finish().map_err(|err| format!("{}", err))?;
+    iter.finish().map_err(|err| anyhow!("{}", err))?;
 
     Ok(changes)
 }
 
-fn parse_index(input: &[u8]) -> Result<GitLocalRepoChanges, Box<dyn Error>> {
+fn parse_index(input: &[u8]) -> Result<GitLocalRepoChanges> {
     let mut iter = iterator(input, get_index_lines);
     let changes = iter.collect::<GitLocalRepoChanges>();
-    iter.finish().map_err(|err| format!("{}", err))?;
+    iter.finish().map_err(|err| anyhow!("{}", err))?;
 
     Ok(changes)
 }

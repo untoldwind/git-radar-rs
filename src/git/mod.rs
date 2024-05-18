@@ -1,19 +1,18 @@
-use std::error::Error;
+use anyhow::Result;
 
 use self::{
-    command::{
+    cli::command::{
         git_cmd_commit_short_sha, git_cmd_commit_tag, git_cmd_local_branch_name,
         git_cmd_merge_base, git_cmd_porcelain_status, git_cmd_remote_branch_name,
         git_cmd_remote_name, git_cmd_rev_to_pull, git_cmd_rev_to_push, git_cmd_stash_count,
     },
-    parse::{branch::build_fully_qualified_remote_branch_name, status::git_parse_status},
+    cli::{branch::build_fully_qualified_remote_branch_name, status::git_parse_status},
 };
 
-pub mod command;
-pub mod parse;
+pub mod cli;
 pub mod types;
 
-pub fn get_git_repo_state() -> Result<types::GitRepoState, Box<dyn Error>> {
+pub fn get_git_repo_state() -> Result<types::GitRepoState> {
     let local_branch = git_cmd_local_branch_name()?;
     let git_status = git_cmd_porcelain_status()?;
     let git_local_repo_changes = git_parse_status(&git_status)?;

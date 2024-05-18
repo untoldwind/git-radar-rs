@@ -1,14 +1,14 @@
-use std::error::Error;
+use anyhow::Result;
 use std::str;
 
 use crate::process::{process_with_exit_code, process_with_ignore_exit_code};
 
-pub fn check_in_git_directory() -> Result<bool, Box<dyn Error>> {
+pub fn check_in_git_directory() -> Result<bool> {
     let (exit_code, _) = process_with_exit_code("git", &["rev-parse", "--git-dir"])?;
     Ok(exit_code.success())
 }
 
-pub fn git_cmd_local_branch_name() -> Result<String, Box<dyn Error>> {
+pub fn git_cmd_local_branch_name() -> Result<String> {
     Ok(str::from_utf8(&process_with_ignore_exit_code(
         "git",
         &["symbolic-ref", "--short", "HEAD"],
@@ -17,7 +17,7 @@ pub fn git_cmd_local_branch_name() -> Result<String, Box<dyn Error>> {
     .into())
 }
 
-pub fn git_cmd_merge_base(local_branch_name: &str) -> Result<String, Box<dyn Error>> {
+pub fn git_cmd_merge_base(local_branch_name: &str) -> Result<String> {
     Ok(str::from_utf8(&process_with_ignore_exit_code(
         "git",
         &["merge-base", "origin/master", local_branch_name],
@@ -26,7 +26,7 @@ pub fn git_cmd_merge_base(local_branch_name: &str) -> Result<String, Box<dyn Err
     .into())
 }
 
-pub fn git_cmd_remote_name(local_branch_name: &str) -> Result<String, Box<dyn Error>> {
+pub fn git_cmd_remote_name(local_branch_name: &str) -> Result<String> {
     Ok(str::from_utf8(&process_with_ignore_exit_code(
         "git",
         &[
@@ -39,7 +39,7 @@ pub fn git_cmd_remote_name(local_branch_name: &str) -> Result<String, Box<dyn Er
     .into())
 }
 
-pub fn git_cmd_remote_branch_name(local_branch_name: &str) -> Result<String, Box<dyn Error>> {
+pub fn git_cmd_remote_branch_name(local_branch_name: &str) -> Result<String> {
     Ok(str::from_utf8(&process_with_ignore_exit_code(
         "git",
         &[
@@ -52,11 +52,11 @@ pub fn git_cmd_remote_branch_name(local_branch_name: &str) -> Result<String, Box
     .into())
 }
 
-pub fn git_cmd_porcelain_status() -> Result<Vec<u8>, Box<dyn Error>> {
+pub fn git_cmd_porcelain_status() -> Result<Vec<u8>> {
     process_with_ignore_exit_code("git", &["status", "--porcelain"])
 }
 
-pub fn git_cmd_rev_to_push(from_commit: &str, to_commit: &str) -> Result<usize, Box<dyn Error>> {
+pub fn git_cmd_rev_to_push(from_commit: &str, to_commit: &str) -> Result<usize> {
     Ok(str::from_utf8(&process_with_ignore_exit_code(
         "git",
         &[
@@ -71,7 +71,7 @@ pub fn git_cmd_rev_to_push(from_commit: &str, to_commit: &str) -> Result<usize, 
     .parse()?)
 }
 
-pub fn git_cmd_rev_to_pull(from_commit: &str, to_commit: &str) -> Result<usize, Box<dyn Error>> {
+pub fn git_cmd_rev_to_pull(from_commit: &str, to_commit: &str) -> Result<usize> {
     Ok(str::from_utf8(&process_with_ignore_exit_code(
         "git",
         &[
@@ -86,14 +86,14 @@ pub fn git_cmd_rev_to_pull(from_commit: &str, to_commit: &str) -> Result<usize, 
     .parse()?)
 }
 
-pub fn git_cmd_stash_count() -> Result<usize, Box<dyn Error>> {
+pub fn git_cmd_stash_count() -> Result<usize> {
     Ok(process_with_ignore_exit_code("git", &["stash", "list"])?
         .into_iter()
         .filter(|ch| *ch == 10)
         .count())
 }
 
-pub fn git_cmd_commit_short_sha() -> Result<String, Box<dyn Error>> {
+pub fn git_cmd_commit_short_sha() -> Result<String> {
     Ok(str::from_utf8(&process_with_ignore_exit_code(
         "git",
         &["rev-parse", "--short", "HEAD"],
@@ -102,7 +102,7 @@ pub fn git_cmd_commit_short_sha() -> Result<String, Box<dyn Error>> {
     .into())
 }
 
-pub fn git_cmd_commit_tag() -> Result<String, Box<dyn Error>> {
+pub fn git_cmd_commit_tag() -> Result<String> {
     Ok(str::from_utf8(&process_with_ignore_exit_code(
         "git",
         &["describe", "--exact-match", "--tags"],

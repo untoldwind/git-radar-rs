@@ -1,9 +1,9 @@
-use std::error::Error;
+use anyhow::Result;
 use std::fs;
 
 pub mod types;
 
-pub fn get_app_config() -> Result<types::Config, Box<dyn Error>> {
+pub fn get_app_config() -> Result<types::Config> {
     if let Some(config_dir) = dirs::config_dir() {
         let config_file = config_dir.join("git-radar-rs").join("config.toml");
         if config_file.exists() {
