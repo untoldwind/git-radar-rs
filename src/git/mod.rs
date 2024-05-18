@@ -43,9 +43,14 @@ pub fn get_git_repo_state() -> Result<types::GitRepoState, Box<dyn Error>> {
 
         repo_state.commits_to_pull = git_cmd_rev_to_pull(&full_remote_branch_name, "HEAD")?;
         repo_state.commits_to_push = git_cmd_rev_to_push(&full_remote_branch_name, "HEAD")?;
+
+        if !merge_base.is_empty() {
+            repo_state.merge_branch_commits_to_pull =
+                git_cmd_rev_to_pull("origin/master", &full_remote_branch_name)?;
+            repo_state.merge_branch_commits_to_push =
+                git_cmd_rev_to_push("origin/master", &full_remote_branch_name)?;
+        }
     }
 
     Ok(repo_state)
 }
-
-fn get_remote_master_merge_state(merge_base: &str, full_remote_branch_name: &str) {}

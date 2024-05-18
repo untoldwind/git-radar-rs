@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let repo_state = get_git_repo_state()?;
     let prompt = build_prompt(args.shell, &config, &repo_state);
 
-    println!("Hello, world! {:?}", repo_state);
+    print!("{}", prompt.trim());
 
     Ok(())
 }

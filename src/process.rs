@@ -11,7 +11,7 @@ pub fn process_with_exit_code(
     let output = Command::new(command)
         .args(options)
         .stdout(Stdio::piped())
-        .stderr(Stdio::inherit())
+        .stderr(Stdio::null())
         .output()?;
 
     Ok((output.status, output.stdout))
