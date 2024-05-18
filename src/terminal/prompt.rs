@@ -1,37 +1,297 @@
 use crate::{config::types::Config, git::types::GitRepoState};
+use std::fmt;
 
 use super::{
     end_color_marker, tell_string_in_color,
     types::{Color, ColorIntensity, Shell},
 };
 
-pub fn build_prompt(shell: Shell, config: &Config, repo_state: &GitRepoState) -> String {
-    let mut result = String::new();
+pub struct Prompt {
+    shell: Shell,
+    config: Config,
+    repo_state: GitRepoState,
+    result: String,
+}
 
-    result += &end_color_marker(shell);
+impl Prompt {
+    pub fn build(shell: Shell, config: Config, repo_state: GitRepoState) -> Prompt {
+        let mut prompt = Self {
+            shell,
+            config,
+            repo_state,
+            result: end_color_marker(shell),
+        };
 
-    if config.parts.show_repo_indicator {
-        result += &config.repo_indicator;
-        result += " ";
-    }
-    if show_merge_branch_indicator(config, repo_state) {
-        result += &add_no_tracked_upstream_indicator(shell, config, repo_state);
-        result += &add_merge_branch_commits(shell, config, repo_state);
-    }
-    if config.parts.show_local_branch {
-        result += &add_local_branch_name(shell, config, repo_state);
-    }
-    if config.parts.show_commits_to_origin {
-        result += &add_local_commits(shell, config, repo_state);
-    }
-    if config.parts.show_local_changes_state {
-        result += &add_repo_state(shell, config, repo_state);
-    }
-    if config.parts.show_stashes {
-        result += &add_stashes(shell, config, repo_state);
+        if prompt.config.parts.show_repo_indicator {
+            prompt.add_repo_indicator();
+        }
+        if show_merge_branch_indicator(&prompt.config, &prompt.repo_state) {
+            prompt.add_no_tracked_upstream_indicator();
+            prompt.add_merge_branch_commits();
+        }
+        if prompt.config.parts.show_local_branch {
+            prompt.add_local_branch_name();
+        }
+        if prompt.config.parts.show_commits_to_origin {
+            prompt.add_local_commits();
+        }
+        if prompt.config.parts.show_local_changes_state {
+            prompt.add_repo_state();
+        }
+        if prompt.config.parts.show_stashes {
+            prompt.add_stashes();
+        }
+
+        prompt
     }
 
-    result
+    fn add_repo_indicator(&mut self) {
+        self.result += &self.config.repo_indicator;
+        self.result += " ";
+    }
+
+    fn add_no_tracked_upstream_indicator(&mut self) {
+        if self.repo_state.remote_tracking_branch.is_empty() {
+            self.result += &tell_string_in_color(
+                self.shell,
+                self.config.no_tracked_upstream_string_color,
+                self.config.no_tracked_upstream_string_intensity,
+                &self.config.no_tracked_upstream_string,
+            );
+            self.result += " ";
+            self.result += &tell_string_in_color(
+                self.shell,
+                self.config.no_tracked_upstream_indicator_color,
+                self.config.no_tracked_upstream_indicator_intensity,
+                &self.config.no_tracked_upstream_indicator,
+            );
+            self.result += " ";
+        }
+    }
+
+    fn add_merge_branch_commits(&mut self) {
+        let push = self.repo_state.merge_branch_commits_to_push;
+        let pull = self.repo_state.merge_branch_commits_to_pull;
+
+        if push > 0 && pull > 0 {
+            self.result += &self.config.merge_branch_commits_indicator;
+            self.result += " ";
+            self.result += &pull.to_string();
+            self.result += &tell_string_in_color(
+                self.shell,
+                Color::Green,
+                ColorIntensity::Vivid,
+                &self.config.merge_branch_commits_both_pull_push,
+            );
+            self.result += &push.to_string();
+            self.result += " ";
+        } else if pull > 0 {
+            self.result += &self.config.merge_branch_commits_indicator;
+            self.result += " ";
+            self.result += &tell_string_in_color(
+                self.shell,
+                Color::Green,
+                ColorIntensity::Vivid,
+                &self.config.merge_branch_commits_only_pull,
+            );
+            self.result += " ";
+            self.result += &pull.to_string();
+            self.result += " ";
+        } else if push > 0 {
+            self.result += &self.config.merge_branch_commits_indicator;
+            self.result += " ";
+            self.result += &tell_string_in_color(
+                self.shell,
+                Color::Green,
+                ColorIntensity::Vivid,
+                &self.config.merge_branch_commits_only_push,
+            );
+            self.result += " ";
+            self.result += &push.to_string();
+            self.result += " ";
+        }
+    }
+
+    fn add_local_branch_name(&mut self) {
+        self.result += &self.config.local_branch_name_prefix;
+
+        if !self.repo_state.local_branch.is_empty() {
+            self.result += &tell_string_in_color(
+                self.shell,
+                self.config.local_branch_color,
+                self.config.local_branch_intensity,
+                &self.repo_state.local_branch,
+            );
+        } else if !self.repo_state.commit_tag.is_empty() {
+            self.result += &tell_string_in_color(
+                self.shell,
+                self.config.local_detached_color,
+                self.config.local_detached_intensity,
+                &format!(
+                    "{}{}",
+                    self.config.local_detached_prefix, self.repo_state.commit_tag
+                ),
+            );
+        } else {
+            self.result += &tell_string_in_color(
+                self.shell,
+                self.config.local_detached_color,
+                self.config.local_detached_intensity,
+                &format!(
+                    "{}{}",
+                    self.config.local_detached_prefix, self.repo_state.commit_short_sha
+                ),
+            );
+        }
+
+        self.result += &self.config.local_branch_name_suffix;
+        self.result += " ";
+    }
+
+    fn add_local_commits(&mut self) {
+        let push = self.repo_state.commits_to_push;
+        let pull = self.repo_state.commits_to_pull;
+
+        if push > 0 && pull > 0 {
+            self.result += &pull.to_string();
+            self.result += &tell_string_in_color(
+                self.shell,
+                self.config.local_commits_push_pull_infix_color,
+                self.config.local_commits_push_pull_infix_intensity,
+                &self.config.local_commits_push_pull_infix,
+            );
+            self.result += &push.to_string();
+            self.result += " "
+        } else if pull > 0 {
+            self.result += &pull.to_string();
+            self.result += &tell_string_in_color(
+                self.shell,
+                self.config.local_commits_pull_suffix_color,
+                self.config.local_commits_pull_suffix_intensity,
+                &self.config.local_commits_pull_suffix,
+            );
+            self.result += " "
+        } else if push > 0 {
+            self.result += &push.to_string();
+            self.result += &tell_string_in_color(
+                self.shell,
+                self.config.local_commits_push_suffix_color,
+                self.config.local_commits_push_suffix_intensity,
+                &self.config.local_commits_push_suffix,
+            );
+            self.result += " "
+        }
+    }
+
+    fn add_repo_state(&mut self) {
+        let inda = self.repo_state.git_local_repo_changes.index_add;
+        let indd = self.repo_state.git_local_repo_changes.index_del;
+        let indm = self.repo_state.git_local_repo_changes.index_mod;
+        let mv = self.repo_state.git_local_repo_changes.renamed;
+
+        add_state_elem(
+            &mut self.result,
+            inda,
+            self.shell,
+            self.config.change_index_add_suffix_color,
+            self.config.change_index_add_suffix_intensity,
+            &self.config.change_index_add_suffix,
+        );
+        add_state_elem(
+            &mut self.result,
+            indd,
+            self.shell,
+            self.config.change_index_del_suffix_color,
+            self.config.change_index_del_suffix_intensity,
+            &self.config.change_index_del_suffix,
+        );
+        add_state_elem(
+            &mut self.result,
+            indm,
+            self.shell,
+            self.config.change_index_mod_suffix_color,
+            self.config.change_index_mod_suffix_intensity,
+            &self.config.change_index_mod_suffix,
+        );
+        add_state_elem(
+            &mut self.result,
+            mv,
+            self.shell,
+            self.config.change_renamed_suffix_color,
+            self.config.change_renamed_suffix_intensity,
+            &self.config.change_renamed_suffix,
+        );
+        if inda > 0 || indd > 0 || indm > 0 || mv > 0 {
+            self.result += " ";
+        }
+
+        let ld = self.repo_state.git_local_repo_changes.local_del;
+        let lm = self.repo_state.git_local_repo_changes.local_mod;
+        add_state_elem(
+            &mut self.result,
+            ld,
+            self.shell,
+            self.config.change_local_del_suffix_color,
+            self.config.change_local_del_suffix_intensity,
+            &self.config.change_local_del_suffix,
+        );
+        add_state_elem(
+            &mut self.result,
+            lm,
+            self.shell,
+            self.config.change_local_mod_suffix_color,
+            self.config.change_local_mod_suffix_intensity,
+            &self.config.change_local_mod_suffix,
+        );
+        if ld > 0 || lm > 0 {
+            self.result += " ";
+        }
+        let la = self.repo_state.git_local_repo_changes.local_add;
+        add_state_elem(
+            &mut self.result,
+            la,
+            self.shell,
+            self.config.change_local_add_suffix_color,
+            self.config.change_local_add_suffix_intensity,
+            &self.config.change_local_add_suffix,
+        );
+        if la > 0 {
+            self.result += " ";
+        }
+
+        let co = self.repo_state.git_local_repo_changes.conflict;
+        add_state_elem(
+            &mut self.result,
+            co,
+            self.shell,
+            self.config.change_conflicted_suffix_color,
+            self.config.change_conflicted_suffix_intensity,
+            &self.config.change_conflicted_suffix,
+        );
+        if co > 0 {
+            self.result += " ";
+        }
+    }
+
+    fn add_stashes(&mut self) {
+        let stash_count = self.repo_state.stash_count;
+        if stash_count > 0 {
+            self.result += &stash_count.to_string();
+            self.result += &tell_string_in_color(
+                self.shell,
+                self.config.stash_suffix_color,
+                self.config.stash_suffix_intensity,
+                &self.config.stash_suffix,
+            );
+            self.result += " "
+        }
+    }
+}
+
+impl fmt::Display for Prompt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.result.trim())
+    }
 }
 
 fn show_merge_branch_indicator(config: &Config, repo_state: &GitRepoState) -> bool {
@@ -39,247 +299,6 @@ fn show_merge_branch_indicator(config: &Config, repo_state: &GitRepoState) -> bo
         && !config
             .merge_branch_ignore_branches
             .contains(&repo_state.local_branch)
-}
-
-fn add_no_tracked_upstream_indicator(
-    shell: Shell,
-    config: &Config,
-    repo_state: &GitRepoState,
-) -> String {
-    let mut result = String::new();
-    if repo_state.remote_tracking_branch.is_empty() {
-        result += &tell_string_in_color(
-            shell,
-            config.no_tracked_upstream_string_color,
-            config.no_tracked_upstream_string_intensity,
-            &config.no_tracked_upstream_string,
-        );
-        result += " ";
-        result += &tell_string_in_color(
-            shell,
-            config.no_tracked_upstream_indicator_color,
-            config.no_tracked_upstream_indicator_intensity,
-            &config.no_tracked_upstream_indicator,
-        );
-        result += " ";
-    }
-    result
-}
-
-fn add_merge_branch_commits(shell: Shell, config: &Config, repo_state: &GitRepoState) -> String {
-    let mut result = String::new();
-    let push = repo_state.merge_branch_commits_to_push;
-    let pull = repo_state.merge_branch_commits_to_pull;
-
-    if push > 0 && pull > 0 {
-        result += &config.merge_branch_commits_indicator;
-        result += " ";
-        result += &pull.to_string();
-        result += &tell_string_in_color(
-            shell,
-            Color::Green,
-            ColorIntensity::Vivid,
-            &config.merge_branch_commits_both_pull_push,
-        );
-        result += &push.to_string();
-        result += " ";
-    } else if pull > 0 {
-        result += &config.merge_branch_commits_indicator;
-        result += " ";
-        result += &tell_string_in_color(
-            shell,
-            Color::Green,
-            ColorIntensity::Vivid,
-            &config.merge_branch_commits_only_pull,
-        );
-        result += " ";
-        result += &pull.to_string();
-        result += " ";
-    } else if push > 0 {
-        result += &config.merge_branch_commits_indicator;
-        result += " ";
-        result += &tell_string_in_color(
-            shell,
-            Color::Green,
-            ColorIntensity::Vivid,
-            &config.merge_branch_commits_only_push,
-        );
-        result += " ";
-        result += &push.to_string();
-        result += " ";
-    }
-
-    result
-}
-
-fn add_local_branch_name(shell: Shell, config: &Config, repo_state: &GitRepoState) -> String {
-    let mut result = String::new();
-
-    result += &config.local_branch_name_prefix;
-
-    if !repo_state.local_branch.is_empty() {
-        result += &tell_string_in_color(
-            shell,
-            config.local_branch_color,
-            config.local_branch_intensity,
-            &repo_state.local_branch,
-        );
-    } else if !repo_state.commit_tag.is_empty() {
-        result += &tell_string_in_color(
-            shell,
-            config.local_detached_color,
-            config.local_detached_intensity,
-            &format!("{}{}", config.local_detached_prefix, repo_state.commit_tag),
-        );
-    } else {
-        result += &tell_string_in_color(
-            shell,
-            config.local_detached_color,
-            config.local_detached_intensity,
-            &format!(
-                "{}{}",
-                config.local_detached_prefix, repo_state.commit_short_sha
-            ),
-        );
-    }
-
-    result += &config.local_branch_name_suffix;
-    result += " ";
-
-    result
-}
-
-fn add_local_commits(shell: Shell, config: &Config, repo_state: &GitRepoState) -> String {
-    let mut result = String::new();
-
-    let push = repo_state.commits_to_push;
-    let pull = repo_state.commits_to_pull;
-
-    if push > 0 && pull > 0 {
-        result += &pull.to_string();
-        result += &tell_string_in_color(
-            shell,
-            config.local_commits_push_pull_infix_color,
-            config.local_commits_push_pull_infix_intensity,
-            &config.local_commits_push_pull_infix,
-        );
-        result += &push.to_string();
-        result += " "
-    } else if pull > 0 {
-        result += &pull.to_string();
-        result += &tell_string_in_color(
-            shell,
-            config.local_commits_pull_suffix_color,
-            config.local_commits_pull_suffix_intensity,
-            &config.local_commits_pull_suffix,
-        );
-        result += " "
-    } else if push > 0 {
-        result += &push.to_string();
-        result += &tell_string_in_color(
-            shell,
-            config.local_commits_push_suffix_color,
-            config.local_commits_push_suffix_intensity,
-            &config.local_commits_push_suffix,
-        );
-        result += " "
-    }
-
-    result
-}
-
-fn add_repo_state(shell: Shell, config: &Config, repo_state: &GitRepoState) -> String {
-    let mut result = String::new();
-
-    let inda = repo_state.git_local_repo_changes.index_add;
-    let indd = repo_state.git_local_repo_changes.index_del;
-    let indm = repo_state.git_local_repo_changes.index_mod;
-    let mv = repo_state.git_local_repo_changes.renamed;
-
-    add_state_elem(
-        &mut result,
-        inda,
-        shell,
-        config.change_index_add_suffix_color,
-        config.change_index_add_suffix_intensity,
-        &config.change_index_add_suffix,
-    );
-    add_state_elem(
-        &mut result,
-        indd,
-        shell,
-        config.change_index_del_suffix_color,
-        config.change_index_del_suffix_intensity,
-        &config.change_index_del_suffix,
-    );
-    add_state_elem(
-        &mut result,
-        indm,
-        shell,
-        config.change_index_mod_suffix_color,
-        config.change_index_mod_suffix_intensity,
-        &config.change_index_mod_suffix,
-    );
-    add_state_elem(
-        &mut result,
-        mv,
-        shell,
-        config.change_renamed_suffix_color,
-        config.change_renamed_suffix_intensity,
-        &config.change_renamed_suffix,
-    );
-    if inda > 0 || indd > 0 || indm > 0 || mv > 0 {
-        result += " ";
-    }
-
-    let ld = repo_state.git_local_repo_changes.local_del;
-    let lm = repo_state.git_local_repo_changes.local_mod;
-    add_state_elem(
-        &mut result,
-        ld,
-        shell,
-        config.change_local_del_suffix_color,
-        config.change_local_del_suffix_intensity,
-        &config.change_local_del_suffix,
-    );
-    add_state_elem(
-        &mut result,
-        lm,
-        shell,
-        config.change_local_mod_suffix_color,
-        config.change_local_mod_suffix_intensity,
-        &config.change_local_mod_suffix,
-    );
-    if ld > 0 || lm > 0 {
-        result += " ";
-    }
-    let la = repo_state.git_local_repo_changes.local_add;
-    add_state_elem(
-        &mut result,
-        la,
-        shell,
-        config.change_local_add_suffix_color,
-        config.change_local_add_suffix_intensity,
-        &config.change_local_add_suffix,
-    );
-    if la > 0 {
-        result += " ";
-    }
-
-    let co = repo_state.git_local_repo_changes.conflict;
-    add_state_elem(
-        &mut result,
-        co,
-        shell,
-        config.change_conflicted_suffix_color,
-        config.change_conflicted_suffix_intensity,
-        &config.change_conflicted_suffix,
-    );
-    if co > 0 {
-        result += " ";
-    }
-
-    result
 }
 
 fn add_state_elem(
@@ -294,22 +313,4 @@ fn add_state_elem(
         *result += &state_elem.to_string();
         *result += &tell_string_in_color(shell, color, color_intensity, letter)
     }
-}
-
-fn add_stashes(shell: Shell, config: &Config, repo_state: &GitRepoState) -> String {
-    let mut result = String::new();
-
-    let stash_count = repo_state.stash_count;
-    if stash_count > 0 {
-        result += &stash_count.to_string();
-        result += &tell_string_in_color(
-            shell,
-            config.stash_suffix_color,
-            config.stash_suffix_intensity,
-            &config.stash_suffix,
-        );
-        result += " "
-    }
-
-    result
 }

@@ -11,7 +11,7 @@ use terminal::types::Shell;
 use crate::{
     config::get_app_config,
     git::{command::check_in_git_directory, get_git_repo_state},
-    terminal::prompt::build_prompt,
+    terminal::prompt::Prompt,
 };
 
 #[derive(Parser)]
@@ -39,9 +39,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let config = get_app_config()?;
     let repo_state = get_git_repo_state()?;
-    let prompt = build_prompt(args.shell, &config, &repo_state);
+    let prompt = Prompt::build(args.shell, config, repo_state);
 
-    print!("{}", prompt.trim());
+    print!("{}", prompt);
 
     Ok(())
 }
