@@ -3,7 +3,7 @@ use std::fmt;
 
 use super::{
     end_color_marker, tell_string_in_color,
-    types::{Color, ColorIntensity, Shell},
+    types::{BaseColor, Color, ColorIntensity, Shell},
 };
 
 pub struct Prompt {
@@ -55,14 +55,12 @@ impl Prompt {
             self.result += &tell_string_in_color(
                 self.shell,
                 self.config.no_tracked_upstream_string_color,
-                self.config.no_tracked_upstream_string_intensity,
                 &self.config.no_tracked_upstream_string,
             );
             self.result += " ";
             self.result += &tell_string_in_color(
                 self.shell,
                 self.config.no_tracked_upstream_indicator_color,
-                self.config.no_tracked_upstream_indicator_intensity,
                 &self.config.no_tracked_upstream_indicator,
             );
             self.result += " ";
@@ -79,8 +77,10 @@ impl Prompt {
             self.result += &pull.to_string();
             self.result += &tell_string_in_color(
                 self.shell,
-                Color::Green,
-                ColorIntensity::Vivid,
+                Color {
+                    color: BaseColor::Green,
+                    intensity: ColorIntensity::Vivid,
+                },
                 &self.config.merge_branch_commits_both_pull_push,
             );
             self.result += &push.to_string();
@@ -90,8 +90,10 @@ impl Prompt {
             self.result += " ";
             self.result += &tell_string_in_color(
                 self.shell,
-                Color::Green,
-                ColorIntensity::Vivid,
+                Color {
+                    color: BaseColor::Green,
+                    intensity: ColorIntensity::Vivid,
+                },
                 &self.config.merge_branch_commits_only_pull,
             );
             self.result += " ";
@@ -102,8 +104,10 @@ impl Prompt {
             self.result += " ";
             self.result += &tell_string_in_color(
                 self.shell,
-                Color::Green,
-                ColorIntensity::Vivid,
+                Color {
+                    color: BaseColor::Green,
+                    intensity: ColorIntensity::Vivid,
+                },
                 &self.config.merge_branch_commits_only_push,
             );
             self.result += " ";
@@ -119,14 +123,12 @@ impl Prompt {
             self.result += &tell_string_in_color(
                 self.shell,
                 self.config.local_branch_color,
-                self.config.local_branch_intensity,
                 &self.repo_state.local_branch,
             );
         } else if !self.repo_state.commit_tag.is_empty() {
             self.result += &tell_string_in_color(
                 self.shell,
                 self.config.local_detached_color,
-                self.config.local_detached_intensity,
                 &format!(
                     "{}{}",
                     self.config.local_detached_prefix, self.repo_state.commit_tag
@@ -136,7 +138,6 @@ impl Prompt {
             self.result += &tell_string_in_color(
                 self.shell,
                 self.config.local_detached_color,
-                self.config.local_detached_intensity,
                 &format!(
                     "{}{}",
                     self.config.local_detached_prefix, self.repo_state.commit_short_sha
@@ -157,7 +158,6 @@ impl Prompt {
             self.result += &tell_string_in_color(
                 self.shell,
                 self.config.local_commits_push_pull_infix_color,
-                self.config.local_commits_push_pull_infix_intensity,
                 &self.config.local_commits_push_pull_infix,
             );
             self.result += &push.to_string();
@@ -167,7 +167,6 @@ impl Prompt {
             self.result += &tell_string_in_color(
                 self.shell,
                 self.config.local_commits_pull_suffix_color,
-                self.config.local_commits_pull_suffix_intensity,
                 &self.config.local_commits_pull_suffix,
             );
             self.result += " "
@@ -176,7 +175,6 @@ impl Prompt {
             self.result += &tell_string_in_color(
                 self.shell,
                 self.config.local_commits_push_suffix_color,
-                self.config.local_commits_push_suffix_intensity,
                 &self.config.local_commits_push_suffix,
             );
             self.result += " "
@@ -194,7 +192,6 @@ impl Prompt {
             inda,
             self.shell,
             self.config.change_index_add_suffix_color,
-            self.config.change_index_add_suffix_intensity,
             &self.config.change_index_add_suffix,
         );
         add_state_elem(
@@ -202,7 +199,6 @@ impl Prompt {
             indd,
             self.shell,
             self.config.change_index_del_suffix_color,
-            self.config.change_index_del_suffix_intensity,
             &self.config.change_index_del_suffix,
         );
         add_state_elem(
@@ -210,7 +206,6 @@ impl Prompt {
             indm,
             self.shell,
             self.config.change_index_mod_suffix_color,
-            self.config.change_index_mod_suffix_intensity,
             &self.config.change_index_mod_suffix,
         );
         add_state_elem(
@@ -218,7 +213,6 @@ impl Prompt {
             mv,
             self.shell,
             self.config.change_renamed_suffix_color,
-            self.config.change_renamed_suffix_intensity,
             &self.config.change_renamed_suffix,
         );
         if inda > 0 || indd > 0 || indm > 0 || mv > 0 {
@@ -232,7 +226,6 @@ impl Prompt {
             ld,
             self.shell,
             self.config.change_local_del_suffix_color,
-            self.config.change_local_del_suffix_intensity,
             &self.config.change_local_del_suffix,
         );
         add_state_elem(
@@ -240,7 +233,6 @@ impl Prompt {
             lm,
             self.shell,
             self.config.change_local_mod_suffix_color,
-            self.config.change_local_mod_suffix_intensity,
             &self.config.change_local_mod_suffix,
         );
         if ld > 0 || lm > 0 {
@@ -252,7 +244,6 @@ impl Prompt {
             la,
             self.shell,
             self.config.change_local_add_suffix_color,
-            self.config.change_local_add_suffix_intensity,
             &self.config.change_local_add_suffix,
         );
         if la > 0 {
@@ -265,7 +256,6 @@ impl Prompt {
             co,
             self.shell,
             self.config.change_conflicted_suffix_color,
-            self.config.change_conflicted_suffix_intensity,
             &self.config.change_conflicted_suffix,
         );
         if co > 0 {
@@ -280,7 +270,6 @@ impl Prompt {
             self.result += &tell_string_in_color(
                 self.shell,
                 self.config.stash_suffix_color,
-                self.config.stash_suffix_intensity,
                 &self.config.stash_suffix,
             );
             self.result += " "
@@ -306,11 +295,10 @@ fn add_state_elem(
     state_elem: usize,
     shell: Shell,
     color: Color,
-    color_intensity: ColorIntensity,
     letter: &str,
 ) {
     if state_elem > 0 {
         *result += &state_elem.to_string();
-        *result += &tell_string_in_color(shell, color, color_intensity, letter)
+        *result += &tell_string_in_color(shell, color, letter)
     }
 }

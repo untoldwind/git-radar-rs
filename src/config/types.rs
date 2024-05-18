@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::terminal::types::{Color, ColorIntensity};
+use crate::terminal::types::{BaseColor, Color, ColorIntensity};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(default)]
@@ -35,10 +35,8 @@ pub struct Config {
 
     pub no_tracked_upstream_string: String,
     pub no_tracked_upstream_string_color: Color,
-    pub no_tracked_upstream_string_intensity: ColorIntensity,
     pub no_tracked_upstream_indicator: String,
     pub no_tracked_upstream_indicator_color: Color,
-    pub no_tracked_upstream_indicator_intensity: ColorIntensity,
 
     pub merge_branch_commits_indicator: String,
     pub merge_branch_commits_only_push: String,
@@ -50,48 +48,34 @@ pub struct Config {
     pub local_branch_name_suffix: String,
     pub local_detached_prefix: String,
     pub local_branch_color: Color,
-    pub local_branch_intensity: ColorIntensity,
     pub local_detached_color: Color,
-    pub local_detached_intensity: ColorIntensity,
 
     pub local_commits_push_suffix: String,
     pub local_commits_push_suffix_color: Color,
-    pub local_commits_push_suffix_intensity: ColorIntensity,
     pub local_commits_pull_suffix: String,
     pub local_commits_pull_suffix_color: Color,
-    pub local_commits_pull_suffix_intensity: ColorIntensity,
     pub local_commits_push_pull_infix: String,
     pub local_commits_push_pull_infix_color: Color,
-    pub local_commits_push_pull_infix_intensity: ColorIntensity,
 
     pub change_index_add_suffix: String,
     pub change_index_add_suffix_color: Color,
-    pub change_index_add_suffix_intensity: ColorIntensity,
     pub change_index_mod_suffix: String,
     pub change_index_mod_suffix_color: Color,
-    pub change_index_mod_suffix_intensity: ColorIntensity,
     pub change_index_del_suffix: String,
     pub change_index_del_suffix_color: Color,
-    pub change_index_del_suffix_intensity: ColorIntensity,
     pub change_local_add_suffix: String,
     pub change_local_add_suffix_color: Color,
-    pub change_local_add_suffix_intensity: ColorIntensity,
     pub change_local_mod_suffix: String,
     pub change_local_mod_suffix_color: Color,
-    pub change_local_mod_suffix_intensity: ColorIntensity,
     pub change_local_del_suffix: String,
     pub change_local_del_suffix_color: Color,
-    pub change_local_del_suffix_intensity: ColorIntensity,
     pub change_renamed_suffix: String,
     pub change_renamed_suffix_color: Color,
-    pub change_renamed_suffix_intensity: ColorIntensity,
     pub change_conflicted_suffix: String,
     pub change_conflicted_suffix_color: Color,
-    pub change_conflicted_suffix_intensity: ColorIntensity,
 
     pub stash_suffix: String,
     pub stash_suffix_color: Color,
-    pub stash_suffix_intensity: ColorIntensity,
 }
 
 impl Default for Config {
@@ -102,11 +86,15 @@ impl Default for Config {
             repo_indicator: "ᚴ".into(),
 
             no_tracked_upstream_string: "upstream".into(),
-            no_tracked_upstream_string_color: Color::Red,
-            no_tracked_upstream_string_intensity: ColorIntensity::Vivid,
+            no_tracked_upstream_string_color: Color {
+                color: BaseColor::Red,
+                intensity: ColorIntensity::Vivid,
+            },
             no_tracked_upstream_indicator: "\u{26A1}".into(),
-            no_tracked_upstream_indicator_color: Color::Red,
-            no_tracked_upstream_indicator_intensity: ColorIntensity::Vivid,
+            no_tracked_upstream_indicator_color: Color {
+                color: BaseColor::Red,
+                intensity: ColorIntensity::Vivid,
+            },
 
             merge_branch_commits_indicator: "\u{1D62E}".into(),
             merge_branch_commits_only_push: "\u{2190}".into(),
@@ -117,49 +105,77 @@ impl Default for Config {
             local_branch_name_prefix: "[".into(),
             local_branch_name_suffix: "]".into(),
             local_detached_prefix: "detached@".into(),
-            local_branch_color: Color::NoColor,
-            local_branch_intensity: ColorIntensity::Vivid,
-            local_detached_color: Color::Yellow,
-            local_detached_intensity: ColorIntensity::Vivid,
+            local_branch_color: Color {
+                color: BaseColor::NoColor,
+                intensity: ColorIntensity::Vivid,
+            },
+            local_detached_color: Color {
+                color: BaseColor::Yellow,
+                intensity: ColorIntensity::Vivid,
+            },
 
             local_commits_push_suffix: "\u{2191}".into(),
-            local_commits_push_suffix_color: Color::Green,
-            local_commits_push_suffix_intensity: ColorIntensity::Vivid,
+            local_commits_push_suffix_color: Color {
+                color: BaseColor::Green,
+                intensity: ColorIntensity::Vivid,
+            },
             local_commits_pull_suffix: "\u{2193}".into(),
-            local_commits_pull_suffix_color: Color::Red,
-            local_commits_pull_suffix_intensity: ColorIntensity::Vivid,
+            local_commits_pull_suffix_color: Color {
+                color: BaseColor::Red,
+                intensity: ColorIntensity::Vivid,
+            },
             local_commits_push_pull_infix: "⥯".into(),
-            local_commits_push_pull_infix_color: Color::Green,
-            local_commits_push_pull_infix_intensity: ColorIntensity::Vivid,
+            local_commits_push_pull_infix_color: Color {
+                color: BaseColor::Green,
+                intensity: ColorIntensity::Vivid,
+            },
 
             change_index_add_suffix: "A".into(),
-            change_index_add_suffix_color: Color::Green,
-            change_index_add_suffix_intensity: ColorIntensity::Vivid,
+            change_index_add_suffix_color: Color {
+                color: BaseColor::Green,
+                intensity: ColorIntensity::Vivid,
+            },
             change_index_mod_suffix: "M".into(),
-            change_index_mod_suffix_color: Color::Green,
-            change_index_mod_suffix_intensity: ColorIntensity::Vivid,
+            change_index_mod_suffix_color: Color {
+                color: BaseColor::Green,
+                intensity: ColorIntensity::Vivid,
+            },
             change_index_del_suffix: "D".into(),
-            change_index_del_suffix_color: Color::Green,
-            change_index_del_suffix_intensity: ColorIntensity::Vivid,
+            change_index_del_suffix_color: Color {
+                color: BaseColor::Green,
+                intensity: ColorIntensity::Vivid,
+            },
             change_local_add_suffix: "A".into(),
-            change_local_add_suffix_color: Color::White,
-            change_local_add_suffix_intensity: ColorIntensity::Vivid,
+            change_local_add_suffix_color: Color {
+                color: BaseColor::White,
+                intensity: ColorIntensity::Vivid,
+            },
             change_local_mod_suffix: "M".into(),
-            change_local_mod_suffix_color: Color::Red,
-            change_local_mod_suffix_intensity: ColorIntensity::Vivid,
+            change_local_mod_suffix_color: Color {
+                color: BaseColor::Red,
+                intensity: ColorIntensity::Vivid,
+            },
             change_local_del_suffix: "D".into(),
-            change_local_del_suffix_color: Color::Red,
-            change_local_del_suffix_intensity: ColorIntensity::Vivid,
+            change_local_del_suffix_color: Color {
+                color: BaseColor::Red,
+                intensity: ColorIntensity::Vivid,
+            },
             change_renamed_suffix: "R".into(),
-            change_renamed_suffix_color: Color::Green,
-            change_renamed_suffix_intensity: ColorIntensity::Vivid,
+            change_renamed_suffix_color: Color {
+                color: BaseColor::Green,
+                intensity: ColorIntensity::Vivid,
+            },
             change_conflicted_suffix: "C".into(),
-            change_conflicted_suffix_color: Color::Green,
-            change_conflicted_suffix_intensity: ColorIntensity::Vivid,
+            change_conflicted_suffix_color: Color {
+                color: BaseColor::Green,
+                intensity: ColorIntensity::Vivid,
+            },
 
             stash_suffix: "≡".into(),
-            stash_suffix_color: Color::Green,
-            stash_suffix_intensity: ColorIntensity::Vivid,
+            stash_suffix_color: Color {
+                color: BaseColor::Green,
+                intensity: ColorIntensity::Vivid,
+            },
         }
     }
 }
