@@ -1,3 +1,5 @@
+pub mod branch;
+#[cfg(not(feature = "libgit"))]
 pub mod cli;
 #[cfg(feature = "libgit")]
 pub mod libgit;

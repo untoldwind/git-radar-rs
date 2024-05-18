@@ -1,5 +1,4 @@
 use self::{
-    branch::build_fully_qualified_remote_branch_name,
     command::{
         git_cmd_commit_short_sha, git_cmd_commit_tag, git_cmd_local_branch_name,
         git_cmd_merge_base, git_cmd_porcelain_status, git_cmd_remote_branch_name,
@@ -10,9 +9,8 @@ use self::{
 };
 use anyhow::Result;
 
-use super::types::GitRepoState;
+use super::{branch::build_fully_qualified_remote_branch_name, types::GitRepoState};
 
-pub mod branch;
 pub mod command;
 pub mod process;
 pub mod status;
