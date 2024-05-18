@@ -1,6 +1,5 @@
 pub mod config;
 pub mod git;
-pub mod process;
 pub mod terminal;
 
 use anyhow::Result;
@@ -9,7 +8,7 @@ use terminal::types::Shell;
 
 use crate::{
     config::get_app_config,
-    git::{cli::command::check_in_git_directory, get_git_repo_state},
+    git::{check_in_git_directory, get_git_repo_state},
     terminal::prompt::Prompt,
 };
 

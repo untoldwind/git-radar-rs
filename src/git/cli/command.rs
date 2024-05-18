@@ -1,12 +1,7 @@
 use anyhow::Result;
 use std::str;
 
-use crate::process::{process_with_exit_code, process_with_ignore_exit_code};
-
-pub fn check_in_git_directory() -> Result<bool> {
-    let (exit_code, _) = process_with_exit_code("git", &["rev-parse", "--git-dir"])?;
-    Ok(exit_code.success())
-}
+use super::process::process_with_ignore_exit_code;
 
 pub fn git_cmd_local_branch_name() -> Result<String> {
     Ok(str::from_utf8(&process_with_ignore_exit_code(

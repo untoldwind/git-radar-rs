@@ -1,33 +1,36 @@
-use self::{
-    branch::build_fully_qualified_remote_branch_name,
-    command::{
-        git_cmd_commit_short_sha, git_cmd_commit_tag, git_cmd_local_branch_name,
-        git_cmd_merge_base, git_cmd_porcelain_status, git_cmd_remote_branch_name,
-        git_cmd_remote_name, git_cmd_rev_to_pull, git_cmd_rev_to_push, git_cmd_stash_count,
-    },
-    process::process_with_exit_code,
-    status::git_parse_status,
-};
 use anyhow::Result;
+use git2::{ErrorCode, Repository};
 
-use super::types::GitRepoState;
+use self::command::{local_branch_name, local_repo_changes, remote_branch_name, remote_name, stash_count};
 
-pub mod branch;
+use super::{
+    cli::{
+        branch::build_fully_qualified_remote_branch_name,
+        command::{
+            git_cmd_commit_short_sha, git_cmd_commit_tag, git_cmd_merge_base,
+            git_cmd_rev_to_pull,
+            git_cmd_rev_to_push,
+        },
+    },
+    types::GitRepoState,
+};
+
 pub mod command;
-pub mod process;
-pub mod status;
 
 pub fn check_in_git_directory() -> Result<bool> {
-    let (exit_code, _) = process_with_exit_code("git", &["rev-parse", "--git-dir"])?;
-    Ok(exit_code.success())
+    match Repository::open_from_env() {
+        Ok(_) => Ok(true),
+        Err(err) if err.code() == ErrorCode::NotFound => Ok(false),
+        Err(err) => Err(err.into()),
+    }
 }
 
 pub fn get_git_repo_state() -> Result<GitRepoState> {
-    let local_branch = git_cmd_local_branch_name()?;
-    let git_status = git_cmd_porcelain_status()?;
-    let git_local_repo_changes = git_parse_status(&git_status)?;
-    let remote = git_cmd_remote_name(&local_branch)?;
-    let stash_count = git_cmd_stash_count()?;
+    let mut repository = Repository::open_from_env()?;
+    let local_branch = local_branch_name(&repository)?;
+    let git_local_repo_changes = local_repo_changes(&repository)?;
+    let remote = remote_name(&repository, &local_branch)?;
+    let stash_count = stash_count(&mut repository)?;
     let commit_short_sha = git_cmd_commit_short_sha()?;
     let commit_tag = git_cmd_commit_tag()?;
 
@@ -42,7 +45,7 @@ pub fn get_git_repo_state() -> Result<GitRepoState> {
     };
 
     if !repo_state.remote.is_empty() {
-        repo_state.remote_tracking_branch = git_cmd_remote_branch_name(&repo_state.local_branch)?;
+        repo_state.remote_tracking_branch = remote_branch_name(&repository, &repo_state.local_branch)?;
         let merge_base = git_cmd_merge_base(&repo_state.local_branch)?;
 
         let full_remote_branch_name = build_fully_qualified_remote_branch_name(
