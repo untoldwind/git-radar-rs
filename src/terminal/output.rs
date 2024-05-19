@@ -1,6 +1,6 @@
 use std::fmt;
 
-use super::types::{Color, Shell};
+use super::types::{Color, ColoredTag, Shell};
 
 pub struct TerminalOutput<W> {
     shell: Shell,
@@ -25,6 +25,10 @@ where
         self.writer.write_str(str)?;
         self.end_color_marker()?;
         Ok(())
+    }
+
+    pub fn colored_tag(&mut self, colored_tag: &ColoredTag) -> fmt::Result {
+        self.string_in_color(colored_tag.color, &colored_tag.tag)
     }
 
     pub fn start_color_marker(&mut self, color: Color) -> fmt::Result {

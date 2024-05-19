@@ -75,6 +75,14 @@ impl Color {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+pub struct ColoredTag {
+    #[serde(flatten)]
+    pub color: Color,
+    pub tag: String,
+}
+
 #[derive(ValueEnum, Clone, Copy, Debug)]
 #[clap(rename_all = "lower")]
 pub enum Shell {

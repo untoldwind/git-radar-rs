@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::terminal::types::{BaseColor, Color, ColorIntensity};
+use crate::terminal::types::{BaseColor, Color, ColorIntensity, ColoredTag};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(default)]
@@ -33,15 +33,13 @@ pub struct Config {
 
     pub repo_indicator: String,
 
-    pub no_tracked_upstream_string: String,
-    pub no_tracked_upstream_string_color: Color,
-    pub no_tracked_upstream_indicator: String,
-    pub no_tracked_upstream_indicator_color: Color,
+    pub no_tracked_upstream_string: ColoredTag,
+    pub no_tracked_upstream_indicator: ColoredTag,
 
     pub merge_branch_commits_indicator: String,
-    pub merge_branch_commits_only_push: String,
-    pub merge_branch_commits_only_pull: String,
-    pub merge_branch_commits_both_pull_push: String,
+    pub merge_branch_commits_only_push: ColoredTag,
+    pub merge_branch_commits_only_pull: ColoredTag,
+    pub merge_branch_commits_both_pull_push: ColoredTag,
     pub merge_branch_ignore_branches: Vec<String>,
 
     pub local_branch_name_prefix: String,
@@ -50,32 +48,20 @@ pub struct Config {
     pub local_branch_color: Color,
     pub local_detached_color: Color,
 
-    pub local_commits_push_suffix: String,
-    pub local_commits_push_suffix_color: Color,
-    pub local_commits_pull_suffix: String,
-    pub local_commits_pull_suffix_color: Color,
-    pub local_commits_push_pull_infix: String,
-    pub local_commits_push_pull_infix_color: Color,
+    pub local_commits_push_suffix: ColoredTag,
+    pub local_commits_pull_suffix: ColoredTag,
+    pub local_commits_push_pull_infix: ColoredTag,
 
-    pub change_index_add_suffix: String,
-    pub change_index_add_suffix_color: Color,
-    pub change_index_mod_suffix: String,
-    pub change_index_mod_suffix_color: Color,
-    pub change_index_del_suffix: String,
-    pub change_index_del_suffix_color: Color,
-    pub change_local_add_suffix: String,
-    pub change_local_add_suffix_color: Color,
-    pub change_local_mod_suffix: String,
-    pub change_local_mod_suffix_color: Color,
-    pub change_local_del_suffix: String,
-    pub change_local_del_suffix_color: Color,
-    pub change_renamed_suffix: String,
-    pub change_renamed_suffix_color: Color,
-    pub change_conflicted_suffix: String,
-    pub change_conflicted_suffix_color: Color,
+    pub change_index_add_suffix: ColoredTag,
+    pub change_index_mod_suffix: ColoredTag,
+    pub change_index_del_suffix: ColoredTag,
+    pub change_local_add_suffix: ColoredTag,
+    pub change_local_mod_suffix: ColoredTag,
+    pub change_local_del_suffix: ColoredTag,
+    pub change_renamed_suffix: ColoredTag,
+    pub change_conflicted_suffix: ColoredTag,
 
-    pub stash_suffix: String,
-    pub stash_suffix_color: Color,
+    pub stash_suffix: ColoredTag,
 }
 
 impl Default for Config {
@@ -85,21 +71,43 @@ impl Default for Config {
 
             repo_indicator: "ᚴ".into(),
 
-            no_tracked_upstream_string: "upstream".into(),
-            no_tracked_upstream_string_color: Color {
-                color: BaseColor::Red,
-                intensity: ColorIntensity::Vivid,
+            no_tracked_upstream_string: ColoredTag {
+                tag: "upstream".into(),
+                color: Color {
+                    color: BaseColor::Red,
+                    intensity: ColorIntensity::Vivid,
+                },
             },
-            no_tracked_upstream_indicator: "\u{26A1}".into(),
-            no_tracked_upstream_indicator_color: Color {
-                color: BaseColor::Red,
-                intensity: ColorIntensity::Vivid,
+            no_tracked_upstream_indicator: ColoredTag {
+                tag: "\u{26A1}".into(),
+                color: Color {
+                    color: BaseColor::Red,
+                    intensity: ColorIntensity::Vivid,
+                },
             },
 
             merge_branch_commits_indicator: "\u{1D62E}".into(),
-            merge_branch_commits_only_push: "\u{2190}".into(),
-            merge_branch_commits_only_pull: "\u{2192}".into(),
-            merge_branch_commits_both_pull_push: "\u{21C4}".into(),
+            merge_branch_commits_only_push: ColoredTag {
+                tag: "\u{2190}".into(),
+                color: Color {
+                    color: BaseColor::Green,
+                    intensity: ColorIntensity::Vivid,
+                },
+            },
+            merge_branch_commits_only_pull: ColoredTag {
+                tag: "\u{2192}".into(),
+                color: Color {
+                    color: BaseColor::Green,
+                    intensity: ColorIntensity::Vivid,
+                },
+            },
+            merge_branch_commits_both_pull_push: ColoredTag {
+                tag: "\u{21C4}".into(),
+                color: Color {
+                    color: BaseColor::Green,
+                    intensity: ColorIntensity::Vivid,
+                },
+            },
             merge_branch_ignore_branches: ["gh-pages".into()].into(),
 
             local_branch_name_prefix: "[".into(),
@@ -114,67 +122,91 @@ impl Default for Config {
                 intensity: ColorIntensity::Vivid,
             },
 
-            local_commits_push_suffix: "\u{2191}".into(),
-            local_commits_push_suffix_color: Color {
-                color: BaseColor::Green,
-                intensity: ColorIntensity::Vivid,
+            local_commits_push_suffix: ColoredTag {
+                tag: "\u{2191}".into(),
+                color: Color {
+                    color: BaseColor::Green,
+                    intensity: ColorIntensity::Vivid,
+                },
             },
-            local_commits_pull_suffix: "\u{2193}".into(),
-            local_commits_pull_suffix_color: Color {
-                color: BaseColor::Red,
-                intensity: ColorIntensity::Vivid,
+            local_commits_pull_suffix: ColoredTag {
+                tag: "\u{2193}".into(),
+                color: Color {
+                    color: BaseColor::Red,
+                    intensity: ColorIntensity::Vivid,
+                },
             },
-            local_commits_push_pull_infix: "⥯".into(),
-            local_commits_push_pull_infix_color: Color {
-                color: BaseColor::Green,
-                intensity: ColorIntensity::Vivid,
-            },
-
-            change_index_add_suffix: "A".into(),
-            change_index_add_suffix_color: Color {
-                color: BaseColor::Green,
-                intensity: ColorIntensity::Vivid,
-            },
-            change_index_mod_suffix: "M".into(),
-            change_index_mod_suffix_color: Color {
-                color: BaseColor::Green,
-                intensity: ColorIntensity::Vivid,
-            },
-            change_index_del_suffix: "D".into(),
-            change_index_del_suffix_color: Color {
-                color: BaseColor::Green,
-                intensity: ColorIntensity::Vivid,
-            },
-            change_local_add_suffix: "A".into(),
-            change_local_add_suffix_color: Color {
-                color: BaseColor::White,
-                intensity: ColorIntensity::Vivid,
-            },
-            change_local_mod_suffix: "M".into(),
-            change_local_mod_suffix_color: Color {
-                color: BaseColor::Red,
-                intensity: ColorIntensity::Vivid,
-            },
-            change_local_del_suffix: "D".into(),
-            change_local_del_suffix_color: Color {
-                color: BaseColor::Red,
-                intensity: ColorIntensity::Vivid,
-            },
-            change_renamed_suffix: "R".into(),
-            change_renamed_suffix_color: Color {
-                color: BaseColor::Green,
-                intensity: ColorIntensity::Vivid,
-            },
-            change_conflicted_suffix: "C".into(),
-            change_conflicted_suffix_color: Color {
-                color: BaseColor::Green,
-                intensity: ColorIntensity::Vivid,
+            local_commits_push_pull_infix: ColoredTag {
+                tag: "⥯".into(),
+                color: Color {
+                    color: BaseColor::Green,
+                    intensity: ColorIntensity::Vivid,
+                },
             },
 
-            stash_suffix: "≡".into(),
-            stash_suffix_color: Color {
-                color: BaseColor::Green,
-                intensity: ColorIntensity::Vivid,
+            change_index_add_suffix: ColoredTag {
+                tag: "A".into(),
+                color: Color {
+                    color: BaseColor::Green,
+                    intensity: ColorIntensity::Vivid,
+                },
+            },
+            change_index_mod_suffix: ColoredTag {
+                tag: "M".into(),
+                color: Color {
+                    color: BaseColor::Green,
+                    intensity: ColorIntensity::Vivid,
+                },
+            },
+            change_index_del_suffix: ColoredTag {
+                tag: "D".into(),
+                color: Color {
+                    color: BaseColor::Green,
+                    intensity: ColorIntensity::Vivid,
+                },
+            },
+            change_local_add_suffix: ColoredTag {
+                tag: "A".into(),
+                color: Color {
+                    color: BaseColor::White,
+                    intensity: ColorIntensity::Vivid,
+                },
+            },
+            change_local_mod_suffix: ColoredTag {
+                tag: "M".into(),
+                color: Color {
+                    color: BaseColor::Red,
+                    intensity: ColorIntensity::Vivid,
+                },
+            },
+            change_local_del_suffix: ColoredTag {
+                tag: "D".into(),
+                color: Color {
+                    color: BaseColor::Red,
+                    intensity: ColorIntensity::Vivid,
+                },
+            },
+            change_renamed_suffix: ColoredTag {
+                tag: "R".into(),
+                color: Color {
+                    color: BaseColor::Green,
+                    intensity: ColorIntensity::Vivid,
+                },
+            },
+            change_conflicted_suffix: ColoredTag {
+                tag: "C".into(),
+                color: Color {
+                    color: BaseColor::Green,
+                    intensity: ColorIntensity::Vivid,
+                },
+            },
+
+            stash_suffix: ColoredTag {
+                tag: "≡".into(),
+                color: Color {
+                    color: BaseColor::Green,
+                    intensity: ColorIntensity::Vivid,
+                },
             },
         }
     }

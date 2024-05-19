@@ -3,7 +3,7 @@ use std::fmt::{self, Write};
 
 use super::{
     output::TerminalOutput,
-    types::{BaseColor, Color, ColorIntensity, Shell},
+    types::{ColoredTag, Shell},
 };
 
 pub struct Prompt {
@@ -32,15 +32,9 @@ impl Prompt {
         output: &mut TerminalOutput<W>,
     ) -> fmt::Result {
         if self.repo_state.remote_tracking_branch.is_empty() {
-            output.string_in_color(
-                self.config.no_tracked_upstream_string_color,
-                &self.config.no_tracked_upstream_string,
-            )?;
+            output.colored_tag(&self.config.no_tracked_upstream_string)?;
             output.add_delimter();
-            output.string_in_color(
-                self.config.no_tracked_upstream_indicator_color,
-                &self.config.no_tracked_upstream_indicator,
-            )?;
+            output.colored_tag(&self.config.no_tracked_upstream_indicator)?;
             output.add_delimter();
         }
         Ok(())
@@ -54,39 +48,21 @@ impl Prompt {
             output.write_str(&self.config.merge_branch_commits_indicator)?;
             output.add_delimter();
             write!(output, "{}", pull)?;
-            output.string_in_color(
-                Color {
-                    color: BaseColor::Green,
-                    intensity: ColorIntensity::Vivid,
-                },
-                &self.config.merge_branch_commits_both_pull_push,
-            )?;
+            output.colored_tag(&self.config.merge_branch_commits_both_pull_push)?;
             output.add_delimter();
             write!(output, "{}", push)?;
             output.add_delimter();
         } else if pull > 0 {
             output.write_str(&self.config.merge_branch_commits_indicator)?;
             output.add_delimter();
-            output.string_in_color(
-                Color {
-                    color: BaseColor::Green,
-                    intensity: ColorIntensity::Vivid,
-                },
-                &self.config.merge_branch_commits_only_pull,
-            )?;
+            output.colored_tag(&self.config.merge_branch_commits_only_pull)?;
             output.add_delimter();
             write!(output, "{}", pull)?;
             output.add_delimter();
         } else if push > 0 {
             output.write_str(&self.config.merge_branch_commits_indicator)?;
             output.add_delimter();
-            output.string_in_color(
-                Color {
-                    color: BaseColor::Green,
-                    intensity: ColorIntensity::Vivid,
-                },
-                &self.config.merge_branch_commits_only_push,
-            )?;
+            output.colored_tag(&self.config.merge_branch_commits_only_push)?;
             output.add_delimter();
             write!(output, "{}", push)?;
             output.add_delimter();
@@ -131,25 +107,16 @@ impl Prompt {
 
         if push > 0 && pull > 0 {
             write!(output, "{}", pull)?;
-            output.string_in_color(
-                self.config.local_commits_push_pull_infix_color,
-                &self.config.local_commits_push_pull_infix,
-            )?;
+            output.colored_tag(&self.config.local_commits_push_pull_infix)?;
             write!(output, "{}", push)?;
             output.add_delimter();
         } else if pull > 0 {
             write!(output, "{}", pull)?;
-            output.string_in_color(
-                self.config.local_commits_pull_suffix_color,
-                &self.config.local_commits_pull_suffix,
-            )?;
+            output.colored_tag(&self.config.local_commits_pull_suffix)?;
             output.add_delimter();
         } else if push > 0 {
             write!(output, "{}", push)?;
-            output.string_in_color(
-                self.config.local_commits_push_suffix_color,
-                &self.config.local_commits_push_suffix,
-            )?;
+            output.colored_tag(&self.config.local_commits_push_suffix)?;
             output.add_delimter();
         }
         Ok(())
@@ -159,25 +126,21 @@ impl Prompt {
         add_state_elem(
             output,
             self.repo_state.git_local_repo_changes.index_add,
-            self.config.change_index_add_suffix_color,
             &self.config.change_index_add_suffix,
         )?;
         add_state_elem(
             output,
             self.repo_state.git_local_repo_changes.index_del,
-            self.config.change_index_del_suffix_color,
             &self.config.change_index_del_suffix,
         )?;
         add_state_elem(
             output,
             self.repo_state.git_local_repo_changes.index_mod,
-            self.config.change_index_mod_suffix_color,
             &self.config.change_index_mod_suffix,
         )?;
         add_state_elem(
             output,
             self.repo_state.git_local_repo_changes.renamed,
-            self.config.change_renamed_suffix_color,
             &self.config.change_renamed_suffix,
         )?;
         output.add_delimter();
@@ -185,13 +148,11 @@ impl Prompt {
         add_state_elem(
             output,
             self.repo_state.git_local_repo_changes.local_del,
-            self.config.change_local_del_suffix_color,
             &self.config.change_local_del_suffix,
         )?;
         add_state_elem(
             output,
             self.repo_state.git_local_repo_changes.local_mod,
-            self.config.change_local_mod_suffix_color,
             &self.config.change_local_mod_suffix,
         )?;
         output.add_delimter();
@@ -199,7 +160,6 @@ impl Prompt {
         add_state_elem(
             output,
             self.repo_state.git_local_repo_changes.local_add,
-            self.config.change_local_add_suffix_color,
             &self.config.change_local_add_suffix,
         )?;
         output.add_delimter();
@@ -207,7 +167,6 @@ impl Prompt {
         add_state_elem(
             output,
             self.repo_state.git_local_repo_changes.conflict,
-            self.config.change_conflicted_suffix_color,
             &self.config.change_conflicted_suffix,
         )?;
         output.add_delimter();
@@ -216,12 +175,11 @@ impl Prompt {
     }
 
     fn add_stashes<W: Write>(&self, output: &mut TerminalOutput<W>) -> fmt::Result {
-        let stash_count = self.repo_state.stash_count;
-        if stash_count > 0 {
-            write!(output, "{}", stash_count)?;
-            output.string_in_color(self.config.stash_suffix_color, &self.config.stash_suffix)?;
-            output.add_delimter();
-        }
+        add_state_elem(
+            output,
+            self.repo_state.stash_count,
+            &self.config.stash_suffix,
+        )?;
         Ok(())
     }
 
@@ -266,12 +224,11 @@ impl fmt::Display for Prompt {
 fn add_state_elem<W: Write>(
     output: &mut TerminalOutput<W>,
     state_elem: usize,
-    color: Color,
-    letter: &str,
+    colored_tag: &ColoredTag,
 ) -> fmt::Result {
     if state_elem > 0 {
         write!(output, "{}", state_elem)?;
-        output.string_in_color(color, letter)?;
+        output.colored_tag(colored_tag)?;
     }
     Ok(())
 }
