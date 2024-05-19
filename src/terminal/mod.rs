@@ -1,5 +1,6 @@
 use self::types::{Color, Shell};
 
+pub mod output;
 pub mod prompt;
 pub mod types;
 
