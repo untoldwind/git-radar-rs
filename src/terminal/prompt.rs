@@ -61,6 +61,7 @@ impl Prompt {
                 },
                 &self.config.merge_branch_commits_both_pull_push,
             )?;
+            output.add_delimter();
             write!(output, "{}", push)?;
             output.add_delimter();
         } else if pull > 0 {
@@ -77,7 +78,7 @@ impl Prompt {
             write!(output, "{}", pull)?;
             output.add_delimter();
         } else if push > 0 {
-            output.write_str(&&self.config.merge_branch_commits_indicator)?;
+            output.write_str(&self.config.merge_branch_commits_indicator)?;
             output.add_delimter();
             output.string_in_color(
                 Color {
@@ -237,6 +238,7 @@ impl fmt::Display for Prompt {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut output = TerminalOutput::new(self.shell, f);
 
+        output.end_color_marker()?;
         if self.config.parts.show_repo_indicator {
             self.add_repo_indicator(&mut output)?;
         }

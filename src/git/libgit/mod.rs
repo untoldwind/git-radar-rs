@@ -3,7 +3,7 @@ use git2::{ErrorCode, Repository};
 
 use self::command::{
     commit_short_sha, commit_tag, local_branch_name, local_repo_changes, merge_base,
-    remote_branch_name, remote_name, rev_to_pull, rev_to_push, stash_count,
+    remote_branch_name, remote_default_branch, remote_name, rev_to_pull, rev_to_push, stash_count,
 };
 
 use super::{branch::build_fully_qualified_remote_branch_name, types::GitRepoState};
@@ -40,7 +40,12 @@ pub fn get_git_repo_state() -> Result<GitRepoState> {
     if !repo_state.remote.is_empty() {
         repo_state.remote_tracking_branch =
             remote_branch_name(&repository, &repo_state.local_branch)?;
-        let merge_base = merge_base(&repository, &repo_state.local_branch)?;
+        let remote_default_branch = remote_default_branch(&repository, &repo_state.remote)?;
+        let merge_base = merge_base(
+            &repository,
+            &remote_default_branch,
+            &repo_state.local_branch,
+        )?;
 
         let full_remote_branch_name = build_fully_qualified_remote_branch_name(
             &repo_state.remote,
@@ -51,10 +56,16 @@ pub fn get_git_repo_state() -> Result<GitRepoState> {
         repo_state.commits_to_push = rev_to_push(&repository, &full_remote_branch_name, "HEAD")?;
 
         if !merge_base.is_empty() {
-            repo_state.merge_branch_commits_to_pull =
-                rev_to_pull(&repository, "origin/master", &full_remote_branch_name)?;
-            repo_state.merge_branch_commits_to_push =
-                rev_to_push(&repository, "origin/master", &full_remote_branch_name)?;
+            repo_state.merge_branch_commits_to_pull = rev_to_pull(
+                &repository,
+                &remote_default_branch,
+                &full_remote_branch_name,
+            )?;
+            repo_state.merge_branch_commits_to_push = rev_to_push(
+                &repository,
+                &remote_default_branch,
+                &full_remote_branch_name,
+            )?;
         }
     }
 

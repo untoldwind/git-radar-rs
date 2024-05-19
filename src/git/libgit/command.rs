@@ -4,12 +4,15 @@ use git2::{ErrorCode, Repository, Sort, StatusOptions};
 use crate::git::types::GitLocalRepoChanges;
 
 macro_rules! ignore_error_code {
-    ($error_code: ident, $stmt: expr) => {
+    ($error_code: ident, $stmt: expr, $fallback: expr) => {
         match $stmt {
             Ok(result) => result,
-            Err(err) if err.code() == ErrorCode::$error_code => return Ok("".into()),
+            Err(err) if err.code() == ErrorCode::$error_code => return Ok($fallback.into()),
             Err(err) => return Err(err.into()),
         }
+    };
+    ($error_code: ident, $stmt: expr) => {
+        ignore_error_code!($error_code, $stmt, "")
     };
 }
 
@@ -17,7 +20,7 @@ pub fn local_branch_name(repository: &Repository) -> Result<String> {
     let head_ref = repository.find_reference("HEAD")?;
 
     if let Some(symbolic_target) = head_ref.symbolic_target() {
-        if let Some(branch_name) = symbolic_target.split('/').last() {
+        if let Some(branch_name) = symbolic_target.strip_prefix("refs/heads/") {
             return Ok(branch_name.into());
         }
     }
@@ -59,10 +62,28 @@ pub fn local_repo_changes(repository: &Repository) -> Result<GitLocalRepoChanges
     Ok(result)
 }
 
-pub fn merge_base(repository: &Repository, local_branch_name: &str) -> Result<String> {
+pub fn remote_default_branch(repository: &Repository, remote: &str) -> Result<String> {
+    let remote_head = ignore_error_code!(
+        NotFound,
+        repository.find_reference(&format!("refs/remotes/{}/HEAD", remote)),
+        format!("{}/master", remote)
+    );
+    if let Some(remote_ref) = remote_head.symbolic_target() {
+        if let Some(remote_branch) = remote_ref.strip_prefix("refs/remotes/") {
+            return Ok(remote_branch.into());
+        }
+    }
+    Ok(format!("{}/master", remote))
+}
+
+pub fn merge_base(
+    repository: &Repository,
+    remote_default_branch: &str,
+    local_branch_name: &str,
+) -> Result<String> {
     let remote_oid = ignore_error_code!(
         NotFound,
-        repository.refname_to_id("refs/remotes/origin/master")
+        repository.refname_to_id(&format!("refs/remotes/{}", remote_default_branch))
     );
     let local_oid = repository.refname_to_id(&format!("refs/heads/{}", local_branch_name))?;
 
@@ -106,7 +127,7 @@ pub fn commit_short_sha(repository: &Repository) -> Result<String> {
     let head_commit = head.peel_to_commit()?;
     let oid = head_commit.id();
 
-    Ok(format!("{}", &oid.to_string()[..7]))
+    Ok((&oid.to_string()[..7]).into())
 }
 
 pub fn commit_tag(repository: &Repository) -> Result<String> {
@@ -116,13 +137,11 @@ pub fn commit_tag(repository: &Repository) -> Result<String> {
 
     let tags = repository.tag_names(None)?;
 
-    for tag_name in tags.into_iter() {
-        if let Some(tag_name) = tag_name {
-            let tag_ref = repository.find_reference(&format!("refs/tags/{}", tag_name))?;
-            if let Some(tag_oid) = tag_ref.target() {
-                if tag_oid == oid {
-                    return Ok(tag_name.into());
-                }
+    for tag_name in tags.into_iter().flatten() {
+        let tag_ref = repository.find_reference(&format!("refs/tags/{}", tag_name))?;
+        if let Some(tag_oid) = tag_ref.target() {
+            if tag_oid == oid {
+                return Ok(tag_name.into());
             }
         }
     }

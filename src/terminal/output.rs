@@ -28,6 +28,10 @@ where
     }
 
     pub fn start_color_marker(&mut self, color: Color) -> fmt::Result {
+        if self.add_delimiter {
+            self.writer.write_char(' ')?;
+            self.add_delimiter = false;
+        }
         match self.shell {
             Shell::Tmux => self.writer.write_str(color.tmux_start_code()),
             Shell::None => Ok(()),
@@ -36,6 +40,10 @@ where
     }
 
     pub fn end_color_marker(&mut self) -> fmt::Result {
+        if self.add_delimiter {
+            self.writer.write_char(' ')?;
+            self.add_delimiter = false;
+        }
         match self.shell {
             Shell::Tmux => self.writer.write_str("#[fg=default]"),
             Shell::None => Ok(()),
