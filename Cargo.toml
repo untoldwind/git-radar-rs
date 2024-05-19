@@ -2,6 +2,7 @@
 name = "git-radar-rs"
 version = "0.1.0"
 edition = "2021"
+description = "Rust version of git-radar or gitHUD"
 license = "MIT"
 
 [features]
