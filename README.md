@@ -35,3 +35,13 @@ Example for a simplistic zsh-prompt:
 setopt PROMPT_SUBST
 export PROMPT='%1d $(git-radar-rs zsh)$ '
 ```
+
+### Tmux
+
+Example `.tmux.conf´:
+```
+set -g status-bg '#222222'
+set -g status-fg '#ffffff'
+set -g status-right "#{pane_current_command} #(cd '#{pane_current_path}' && git-radar-rs tmux)"
+```
+
