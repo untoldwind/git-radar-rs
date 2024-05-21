@@ -13,6 +13,7 @@ use crate::{
 };
 
 #[derive(Parser)]
+#[clap(name = "git-radar-rs", version = clap::crate_version!())]
 struct Args {
     #[arg(long)]
     show_config: bool,

@@ -13,7 +13,7 @@ default = [ "libgit" ]
 libgit = [ "git2" ]
 
 [dependencies]
-clap = { version = "4", features = ["derive", "env"] }
+clap = { version = "4", features = ["cargo", "derive", "env"] }
 serde = { version = "1", features = ["derive"] }
 toml = "0"
 nom = "7"
