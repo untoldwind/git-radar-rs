@@ -21,8 +21,11 @@ dirs = "5"
 anyhow = "1"
 git2 = { version = "0", optional = true }
 
+[target.x86_64-unknown-linux-musl.dependencies]
+git2 = { version = "0", optional = true, features = ["vendored-libgit2", "vendored-openssl"] }
+
 [profile.release]
 strip = true
-tlo = true
+lto = true
 panic = "abort"
 opt-level = "s"
