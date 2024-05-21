@@ -1,10 +1,12 @@
 [package]
 name = "git-radar-rs"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "Rust version of git-radar or gitHUD"
 license = "MIT"
 repository = "https://github.com/untoldwind/git-radar-rs"
+readme = "README.md"
+keywords = ["git", "git-radar"]
 
 [features]
 default = [ "libgit" ]
