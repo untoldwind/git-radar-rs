@@ -20,6 +20,12 @@ to install a version that uses the `git` command-line (just like the original `g
 
 ## Setup
 
+To track the remote HEAD correctly it might be necessary to run a
+```sh
+git remote set-head origin --auto
+```
+once on the repository (or whenever the remote default branch is changed).
+
 ### Bash
 
 Example for a simplistic bash-prompt:
@@ -35,6 +41,10 @@ Example for a simplistic zsh-prompt:
 setopt PROMPT_SUBST
 export PROMPT='%1d $(git-radar-rs zsh)$ '
 ```
+
+### Fish
+
+`git-radar-rs` can be used directly inside the "fish_prompt" function.
 
 ### Tmux
 
