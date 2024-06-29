@@ -137,7 +137,7 @@ impl Default for Config {
                 },
             },
             local_commits_push_pull_infix: ColoredTag {
-                tag: "⥯".into(),
+                tag: "\u{296F}".into(),
                 color: Color {
                     color: BaseColor::Green,
                     intensity: ColorIntensity::Vivid,
