@@ -65,15 +65,15 @@ pub fn local_repo_changes(repository: &Repository) -> Result<GitLocalRepoChanges
 pub fn remote_default_branch(repository: &Repository, remote: &str) -> Result<String> {
     let remote_head = ignore_error_code!(
         NotFound,
-        repository.find_reference(&format!("refs/remotes/{}/HEAD", remote)),
-        format!("{}/master", remote)
+        repository.find_reference(&format!("refs/remotes/{remote}/HEAD")),
+        format!("{remote}/master")
     );
     if let Some(remote_ref) = remote_head.symbolic_target() {
         if let Some(remote_branch) = remote_ref.strip_prefix("refs/remotes/") {
             return Ok(remote_branch.into());
         }
     }
-    Ok(format!("{}/master", remote))
+    Ok(format!("{remote}/master"))
 }
 
 pub fn merge_base(
@@ -83,9 +83,9 @@ pub fn merge_base(
 ) -> Result<String> {
     let remote_oid = ignore_error_code!(
         NotFound,
-        repository.refname_to_id(&format!("refs/remotes/{}", remote_default_branch))
+        repository.refname_to_id(&format!("refs/remotes/{remote_default_branch}"))
     );
-    let local_oid = repository.refname_to_id(&format!("refs/heads/{}", local_branch_name))?;
+    let local_oid = repository.refname_to_id(&format!("refs/heads/{local_branch_name}"))?;
 
     Ok(repository.merge_base(remote_oid, local_oid)?.to_string())
 }
@@ -138,7 +138,7 @@ pub fn commit_tag(repository: &Repository) -> Result<String> {
     let tags = repository.tag_names(None)?;
 
     for tag_name in tags.into_iter().flatten() {
-        let tag_ref = repository.find_reference(&format!("refs/tags/{}", tag_name))?;
+        let tag_ref = repository.find_reference(&format!("refs/tags/{tag_name}"))?;
         if let Some(tag_oid) = tag_ref.target() {
             if tag_oid == oid {
                 return Ok(tag_name.into());
@@ -193,9 +193,9 @@ pub fn rev_to_pull(repository: &Repository, from_commit: &str, to_commit: &str) 
 }
 
 fn git_remote_tracking_config_key(local_branch_name: &str) -> String {
-    format!("branch.{}.remote", local_branch_name)
+    format!("branch.{local_branch_name}.remote")
 }
 
 fn git_remote_branch_config_key(local_branch_name: &str) -> String {
-    format!("branch.{}.merge", local_branch_name)
+    format!("branch.{local_branch_name}.merge")
 }

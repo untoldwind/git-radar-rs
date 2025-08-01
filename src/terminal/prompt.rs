@@ -47,24 +47,24 @@ impl Prompt {
         if push > 0 && pull > 0 {
             output.write_str(&self.config.merge_branch_commits_indicator)?;
             output.add_delimter();
-            write!(output, "{}", pull)?;
+            write!(output, "{pull}")?;
             output.colored_tag(&self.config.merge_branch_commits_both_pull_push)?;
             output.add_delimter();
-            write!(output, "{}", push)?;
+            write!(output, "{push}")?;
             output.add_delimter();
         } else if pull > 0 {
             output.write_str(&self.config.merge_branch_commits_indicator)?;
             output.add_delimter();
             output.colored_tag(&self.config.merge_branch_commits_only_pull)?;
             output.add_delimter();
-            write!(output, "{}", pull)?;
+            write!(output, "{pull}")?;
             output.add_delimter();
         } else if push > 0 {
             output.write_str(&self.config.merge_branch_commits_indicator)?;
             output.add_delimter();
             output.colored_tag(&self.config.merge_branch_commits_only_push)?;
             output.add_delimter();
-            write!(output, "{}", push)?;
+            write!(output, "{push}")?;
             output.add_delimter();
         }
         Ok(())
@@ -106,16 +106,16 @@ impl Prompt {
         let pull = self.repo_state.commits_to_pull;
 
         if push > 0 && pull > 0 {
-            write!(output, "{}", pull)?;
+            write!(output, "{pull}")?;
             output.colored_tag(&self.config.local_commits_push_pull_infix)?;
-            write!(output, "{}", push)?;
+            write!(output, "{push}")?;
             output.add_delimter();
         } else if pull > 0 {
-            write!(output, "{}", pull)?;
+            write!(output, "{pull}")?;
             output.colored_tag(&self.config.local_commits_pull_suffix)?;
             output.add_delimter();
         } else if push > 0 {
-            write!(output, "{}", push)?;
+            write!(output, "{push}")?;
             output.colored_tag(&self.config.local_commits_push_suffix)?;
             output.add_delimter();
         }
@@ -227,7 +227,7 @@ fn add_state_elem<W: Write>(
     colored_tag: &ColoredTag,
 ) -> fmt::Result {
     if state_elem > 0 {
-        write!(output, "{}", state_elem)?;
+        write!(output, "{state_elem}")?;
         output.colored_tag(colored_tag)?;
     }
     Ok(())

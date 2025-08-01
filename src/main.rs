@@ -40,7 +40,7 @@ fn main() -> Result<()> {
     let repo_state = get_git_repo_state()?;
     let prompt = Prompt::new(args.shell, config, repo_state);
 
-    print!("{}", prompt);
+    print!("{prompt}");
 
     Ok(())
 }

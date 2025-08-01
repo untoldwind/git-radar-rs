@@ -31,8 +31,8 @@ fn end_color_marker(shell: Shell) -> String {
 
 fn apply_shell_markers(shell: Shell, marker: &str) -> String {
     match shell {
-        Shell::Zsh => format!("%{{{}%}}", marker),
-        Shell::Bash => format!("\x01{}\x02", marker),
+        Shell::Zsh => format!("%{{{marker}%}}"),
+        Shell::Bash => format!("\x01{marker}\x02"),
         _ => marker.into(),
     }
 }

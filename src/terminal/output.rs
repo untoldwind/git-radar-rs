@@ -61,8 +61,8 @@ where
 
     fn apply_shell_markers(&mut self, marker: &str) -> fmt::Result {
         match self.shell {
-            Shell::Zsh => write!(self.writer, "%{{{}%}}", marker),
-            Shell::Bash => write!(self.writer, "\x01{}\x02", marker),
+            Shell::Zsh => write!(self.writer, "%{{{marker}%}}"),
+            Shell::Bash => write!(self.writer, "\x01{marker}\x02"),
             _ => self.writer.write_str(marker),
         }
     }
